@@ -84,6 +84,9 @@ async function testHomepageForm(page) {
 		await page.select('#edit-degree-pmh', 'Master of Arts');
 		await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
 		await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
+
+		await setTimeout(1000);
+
 		await page.click('input#edit-actions-wizard-next');
 		await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
@@ -93,6 +96,8 @@ async function testHomepageForm(page) {
 		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
+
+		await setTimeout(1000);
 
 		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
 		await page.waitForNavigation({ timeout: 10000 });
@@ -117,10 +122,11 @@ async function testRequestInfoForm(page) {
 		await page.select('#edit-degree-pmh', 'Master of Arts');
 		await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
 		await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
-		await Promise.all([
-			page.click('input#edit-actions-wizard-next'),
-			page.waitForSelector('input[name="first_name"]'),
-		]);
+
+		await setTimeout(1000);
+
+		await page.click('input#edit-actions-wizard-next');
+		await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
 		// Step 2
 		await page.type('input[name="first_name"]', `test${Date.now()}`);
@@ -128,6 +134,8 @@ async function testRequestInfoForm(page) {
 		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
+
+		await setTimeout(1000);
 
 		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
 		await page.waitForNavigation({ timeout: 10000 });
