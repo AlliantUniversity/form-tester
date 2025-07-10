@@ -17,6 +17,17 @@ const emailSettings = {
 };
 const notifyEmail = process.env.EMAIL_TO;
 
+const pacificFormatter = new Intl.DateTimeFormat('en-US', {
+	timeZone: 'America/Los_Angeles',
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+	hour: 'numeric',
+	minute: 'numeric',
+	second: 'numeric',
+	hour12: true,
+});
+
 async function notify(subject, message) {
 	if (slackWebhook) {
 		await fetch(slackWebhook, {
@@ -182,7 +193,10 @@ async function runTests() {
 		console.log('All forms tested successfully.');
 	} catch (err) {
 		console.error(err.message);
-		await notify('🔥 Form Test Failure', `Error during form testing:\n\n${err.message}`);
+		await notify(
+			'🔥 Form Test Failure',
+			`Error during form testing on ${pacificFormatter.format(new Date())} PT:\n\n${err.message}`,
+		);
 		throw new Error('Test failed');
 	} finally {
 		await browser.close();
@@ -190,7 +204,7 @@ async function runTests() {
 		if (process.env.GITHUB_EVENT_NAME === 'workflow_dispatch') {
 			await notify(
 				'✅ Alliant Form Test Passed (Manual Run)',
-				`All form tests passed successfully on ${new Date().toISOString()}.`,
+				`All form tests passed successfully on ${pacificFormatter.format(new Date())} PT.`,
 			);
 		}
 	}
