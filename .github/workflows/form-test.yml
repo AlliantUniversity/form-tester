@@ -18,8 +18,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Puppeteer
-        run: npm install puppeteer
+      - name: Install Dependencies
+        run: npm install
 
       - name: Run Puppeteer Form Tests
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
+          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+          EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
+          EMAIL_SMTP_PASS: ${{ secrets.EMAIL_SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: node form-test.js
