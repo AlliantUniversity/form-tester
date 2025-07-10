@@ -1,0 +1,25 @@
+name: Twice Daily Form Test
+
+on:
+  schedule:
+    - cron: '0 6,18 * * *' # Runs at 6 AM & 6 PM UTC
+  workflow_dispatch:
+
+jobs:
+  puppeteer-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Puppeteer
+        run: npm install puppeteer
+
+      - name: Run Puppeteer Form Tests
+        run: node form-test.js
