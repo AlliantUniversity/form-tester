@@ -29,4 +29,5 @@ jobs:
           EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
           EMAIL_SMTP_PASS: ${{ secrets.EMAIL_SMTP_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: node form-test.js

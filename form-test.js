@@ -147,6 +147,13 @@ async function runTests() {
     process.exit(1);
   } finally {
     await browser.close();
+
+     if (process.env.GITHUB_EVENT_NAME === 'workflow_dispatch') {
+          await notify(
+            '✅ Alliant Form Test Passed (Manual Run)',
+            `All form tests passed successfully on ${new Date().toISOString()}.`
+          );
+        }
   }
 }
 
