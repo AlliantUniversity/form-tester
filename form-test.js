@@ -34,43 +34,110 @@ async function notify(subject, message) {
   }
 }
 
-async function testForm() {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  const url = 'https://www.alliant.edu/request-information';
+// Helper to scroll into view and click a button safely
+async function scrollAndClick(page, selector) {
+  await page.waitForSelector(selector, { visible: true, timeout: 5000 });
+  const button = await page.$(selector);
 
+  if (button) {
+    await button.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    await page.waitForFunction(
+      (sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          window.getComputedStyle(el).visibility !== 'hidden'
+        );
+      },
+      { timeout: 5000 },
+      selector
+    );
+    await button.evaluate(el => el.click());
+  } else {
+    throw new Error(`Button not found for selector: ${selector}`);
+  }
+}
+
+async function testHomepageForm(page) {
+  const url = 'https://www.alliant.edu';
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    // STEP 1
-    await page.type('#edit-submitted-first-name', 'Test');
-    await page.type('#edit-submitted-last-name', 'User');
-    await page.type('#edit-submitted-email', `test+${Date.now()}@example.com`);
-    await page.type('#edit-submitted-phone', '1234567890');
-    await Promise.all([
-      page.click('input#edit-next'),
-      page.waitForSelector('#edit-submitted-campus')
-    ]);
+    // Step 1
+    await page.select('#edit-area-of-study', 'Psychology and Mental Health');
+    await page.select('#edit-degree-pmh', 'Master of Arts');
+    await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
+    await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
+	await page.click('input#edit-actions-wizard-next');
+	await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
-    // STEP 2
-    await page.select('#edit-submitted-campus', 'San Diego');
-    await page.select('#edit-submitted-program-of-interest', 'MBA');
-    await Promise.all([
-      page.click('input#edit-next'),
-      page.waitForSelector('#edit-submitted-preferred-start-term')
-    ]);
+    // Step 2
+    await page.type('input[name="first_name"]', 'MikeAutoTest');
+    await page.type('input[name="last_name"]', 'Test');
+    await page.type('input[name="email"]', `test+${Date.now()}@gmail.com`);
+    await page.type('input[name="mobile_number"]', '7605629999');
+    await page.type('input[name="zip_code"]', '92108');
 
-    // STEP 3
-    await page.select('#edit-submitted-preferred-start-term', 'Fall 2025');
-    await Promise.all([
-      page.click('input#edit-actions-submit'),
-      page.waitForNavigation({ timeout: 10000 })
-    ]);
+    await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
+	await page.waitForNavigation({ timeout: 10000 });
+    console.log('Homepage form submitted successfully.');
   } catch (err) {
-    console.error('Error during form test:', err);
+    throw new Error(`Homepage form failed: ${err.message}`);
+  }
+}
+
+async function testRequestInfoForm(page) {
+  const url = 'https://www.alliant.edu/request-information';
+  try {
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    // Step 1
+    await page.select('#edit-area-of-study', 'Psychology and Mental Health');
+    await page.select('#edit-degree-pmh', 'Master of Arts');
+    await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
+    await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
+    await Promise.all([
+      page.click('input#edit-actions-wizard-next'),
+      page.waitForSelector('input[name="first_name"]')
+    ]);
+
+    // Step 2
+    await page.type('input[name="first_name"]', 'MikeAutoTest');
+    await page.type('input[name="last_name"]', 'Test');
+    await page.type('input[name="email"]', `test+${Date.now()}@gmail.com`);
+    await page.type('input[name="mobile_number"]', '7605629999');
+    await page.type('input[name="zip_code"]', '92108');
+
+    await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
+    await page.waitForNavigation({ timeout: 10000 });
+    console.log('Request info form submitted successfully.');
+  } catch (err) {
+    throw new Error(`Request info form failed: ${err.message}`);
+  }
+}
+
+async function runTests() {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+
+  await page.setViewport({
+    width: 1920,
+    height: 1080,
+    deviceScaleFactor: 1,
+  });
+
+  try {
+    await testHomepageForm(page);
+    await testRequestInfoForm(page);
+    console.log('All forms tested successfully.');
+  } catch (err) {
+    console.error(err.message);
     await notify(
-      '🔥 Alliant Form Test Failed',
-      `Error:\n\n${err.stack}`
+      '🔥 Form Test Failure',
+      `Error during form testing:\n\n${err.message}`
     );
     process.exit(1);
   } finally {
@@ -78,4 +145,4 @@ async function testForm() {
   }
 }
 
-testForm();
+runTests();
