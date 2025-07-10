@@ -84,6 +84,11 @@ async function testHomepageForm(page) {
 
 		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
 		await page.waitForNavigation({ timeout: 10000 });
+
+		if (!page.url().includes('/thank-you')) {
+			throw new Error(`Unexpected redirect: ${page.url()}`);
+		}
+
 		console.log('Homepage form submitted successfully.');
 	} catch (err) {
 		throw new Error(`Homepage form failed: ${err.message}`);
@@ -114,6 +119,11 @@ async function testRequestInfoForm(page) {
 
 		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
 		await page.waitForNavigation({ timeout: 10000 });
+
+		if (!page.url().includes('/thank-you')) {
+			throw new Error(`Unexpected redirect: ${page.url()}`);
+		}
+
 		console.log('Request info form submitted successfully.');
 	} catch (err) {
 		throw new Error(`Request info form failed: ${err.message}`);
