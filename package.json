@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "puppeteer": "^24.12.1",
-    "node-fetch": "^4.1.0",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
     "dotenv": "^17.2.0"
   }
