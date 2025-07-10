@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer';
 import fetch from 'node-fetch';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { setTimeout } from 'node:timers/promises';
 
 dotenv.config();
 
@@ -130,6 +131,35 @@ async function testRequestInfoForm(page) {
 	}
 }
 
+async function testPaidMediaLandingPageHome(page) {
+	const url = 'https://info.alliant.edu/';
+	try {
+		await page.goto(url, { waitUntil: 'networkidle2' });
+
+		await page.type('input[name="firstName"]', `test${Date.now()}`);
+		await page.type('input[name="lastName"]', 'test');
+		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
+		await page.type('input[name="phone"]', '7605629999');
+		await page.select('select[name="Major__c_contact"]', 'Business Administration (DBA)');
+		await page.select('select[name="Campus__c_lead"]', 'San Diego');
+		await page.select('select[name="Are_you_an_international_student__c"]', 'No');
+		await page.type('input[name="Zip__c"]', '92108');
+		await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
+
+		await setTimeout(1000);
+		await page.click('button[type="submit"]');
+		await page.waitForNavigation({ timeout: 15000 });
+
+		if (!page.url().includes('/thank-you-confirmation')) {
+			throw new Error(`Unexpected redirect: ${page.url()}`);
+		}
+
+		console.log('PM LP form submitted successfully.');
+	} catch (err) {
+		throw new Error(`PM LP form failed: ${err.message}`);
+	}
+}
+
 async function runTests() {
 	const isCI = process.env.CI === 'true';
 
@@ -148,6 +178,7 @@ async function runTests() {
 	try {
 		await testHomepageForm(page);
 		await testRequestInfoForm(page);
+		await testPaidMediaLandingPageHome(page);
 		console.log('All forms tested successfully.');
 	} catch (err) {
 		console.error(err.message);
