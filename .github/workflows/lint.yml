@@ -19,7 +19,7 @@ jobs:
           node-version: 20 # Match your project's version
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run ESLint
         run: npm run lint
