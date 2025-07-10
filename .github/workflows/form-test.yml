@@ -2,8 +2,8 @@ name: Twice Daily Form Test
 
 on:
   schedule:
-    - cron: '0 17 * * *' # 10 AM PT
-    - cron: '0 18 * * *'  # 11 AM PT for testing the cron job
+    - cron: '0 13 * * *' # 6:00 AM PT => 1:00 PM UTC
+    - cron: '0 1 * * *'  # 6:00 PM PT => 1:00 AM UTC
   workflow_dispatch:
 
 jobs:
