@@ -71,8 +71,8 @@ async function testHomepageForm(page) {
     await page.select('#edit-degree-pmh', 'Master of Arts');
     await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
     await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
-	await page.click('input#edit-actions-wizard-next');
-	await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
+    await page.click('input#edit-actions-wizard-next');
+    await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
     // Step 2
     await page.type('input[name="first_name"]', 'MikeAutoTest');
@@ -82,7 +82,7 @@ async function testHomepageForm(page) {
     await page.type('input[name="zip_code"]', '92108');
 
     await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
-	await page.waitForNavigation({ timeout: 10000 });
+    await page.waitForNavigation({ timeout: 10000 });
     console.log('Homepage form submitted successfully.');
   } catch (err) {
     throw new Error(`Homepage form failed: ${err.message}`);
@@ -120,7 +120,12 @@ async function testRequestInfoForm(page) {
 }
 
 async function runTests() {
-  const browser = await puppeteer.launch({ headless: true });
+  const isCI = process.env.CI === 'true';
+
+  const browser = await puppeteer.launch({
+    headless: process.env.HEADLESS !== 'false',
+    args: isCI ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
+  });
   const page = await browser.newPage();
 
   await page.setViewport({
