@@ -76,9 +76,9 @@ async function testHomepageForm(page) {
 		await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
 		// Step 2
-		await page.type('input[name="first_name"]', 'MikeAutoTest');
-		await page.type('input[name="last_name"]', 'Test');
-		await page.type('input[name="email"]', `test+${Date.now()}@gmail.com`);
+		await page.type('input[name="first_name"]', `test${Date.now()}`);
+		await page.type('input[name="last_name"]', 'test');
+		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
 
@@ -111,9 +111,9 @@ async function testRequestInfoForm(page) {
 		]);
 
 		// Step 2
-		await page.type('input[name="first_name"]', 'MikeAutoTest');
-		await page.type('input[name="last_name"]', 'Test');
-		await page.type('input[name="email"]', `test+${Date.now()}@gmail.com`);
+		await page.type('input[name="first_name"]', `test${Date.now()}`);
+		await page.type('input[name="last_name"]', 'test');
+		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
 
