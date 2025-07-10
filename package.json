@@ -1,0 +1,15 @@
+{
+  "name": "alliant-form-tester",
+  "version": "1.0.0",
+  "description": "Automated multi-step form tester for Alliant.edu",
+  "type": "module",
+  "scripts": {
+    "test": "node form-test.js"
+  },
+  "dependencies": {
+    "puppeteer": "^24.12.1",
+    "node-fetch": "^4.1.0",
+    "nodemailer": "^7.0.5",
+    "dotenv": "^17.2.0"
+  }
+}
