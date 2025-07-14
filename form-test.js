@@ -180,8 +180,8 @@ async function testPaidMediaLandingPageHome(page) {
 }
 
 async function runTests() {
+	const failures = [];
 	const isCI = process.env.CI === 'true';
-
 	const browser = await puppeteer.launch({
 		headless: process.env.HEADLESS !== 'false',
 		args: isCI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
@@ -196,18 +196,30 @@ async function runTests() {
 
 	try {
 		await testHomepageForm(page);
-		await testRequestInfoForm(page);
-		await testPaidMediaLandingPageHome(page);
-		console.log('All forms tested successfully.');
 	} catch (err) {
-		console.error(err.message);
+		failures.push(`❌ Homepage: ${err.message}`);
+	}
+
+	try {
+		await testRequestInfoForm(page);
+	} catch (err) {
+		failures.push(`❌ Request Info: ${err.message}`);
+	}
+
+	try {
+		await testPaidMediaLandingPageHome(page);
+	} catch (err) {
+		failures.push(`❌ Paid Media LP: ${err.message}`);
+	}
+
+	if (failures.length > 0) {
 		await notify(
-			'🔥 Form Test Failure',
-			`Error during form testing on ${pacificFormatter.format(new Date())} PT:\n\n${err.message}`,
+			'🔥 Form Test Failures',
+			`Some form tests failed on ${pacificFormatter.format(new Date())} PT:\n\n${failures.join('\n\n')}`,
 		);
-		throw new Error('Test failed');
-	} finally {
-		await browser.close();
+		throw new Error('One or more form tests failed');
+	} else {
+		console.log('All forms tested successfully.');
 
 		if (process.env.GITHUB_EVENT_NAME === 'workflow_dispatch') {
 			await notify(
@@ -216,6 +228,8 @@ async function runTests() {
 			);
 		}
 	}
+
+	await browser.close();
 }
 
 runTests();
