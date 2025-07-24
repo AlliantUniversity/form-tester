@@ -96,6 +96,18 @@ async function testHomepageForm(page) {
 		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
+		await page.waitForResponse(
+			(response) => {
+				return response.url().includes('/api/zipcodes') && response.status() === 200;
+			},
+			{ timeout: 5000 },
+		);
+
+		const city = await page.$eval('input[name="city"]', (field) => field.value);
+		const state = await page.$eval('input[name="state"]', (field) => field.value);
+		if (city !== 'San Diego' || state !== 'CA') {
+			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
+		}
 
 		await setTimeout(1000);
 
@@ -134,6 +146,18 @@ async function testRequestInfoForm(page) {
 		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
 		await page.type('input[name="mobile_number"]', '7605629999');
 		await page.type('input[name="zip_code"]', '92108');
+		await page.waitForResponse(
+			(response) => {
+				return response.url().includes('/api/zipcodes') && response.status() === 200;
+			},
+			{ timeout: 5000 },
+		);
+
+		const city = await page.$eval('input[name="city"]', (field) => field.value);
+		const state = await page.$eval('input[name="state"]', (field) => field.value);
+		if (city !== 'San Diego' || state !== 'CA') {
+			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
+		}
 
 		await setTimeout(1000);
 
@@ -163,6 +187,19 @@ async function testPaidMediaLandingPageHome(page) {
 		await page.select('select[name="Campus__c_lead"]', 'San Diego');
 		await page.select('select[name="Are_you_an_international_student__c"]', 'No');
 		await page.type('input[name="Zip__c"]', '92108');
+		await page.waitForResponse(
+			(response) => {
+				return response.url().includes('/api/zipcodes') && response.status() === 200;
+			},
+			{ timeout: 5000 },
+		);
+
+		const city = await page.$eval('input[name="City__c"]', (field) => field.value);
+		const state = await page.$eval('input[name="State__c"]', (field) => field.value);
+		if (city !== 'San Diego' || state !== 'CA') {
+			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
+		}
+
 		await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
 
 		await setTimeout(1000);
