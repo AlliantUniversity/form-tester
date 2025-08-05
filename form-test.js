@@ -2,12 +2,12 @@
 import puppeteer from 'puppeteer';
 import fetch from 'node-fetch';
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import dotenvFlow from 'dotenv-flow';
 import { setTimeout } from 'node:timers/promises';
 
 import { parameters } from './includes/test-data.js';
 
-dotenv.config();
+dotenvFlow.config();
 
 const slackWebhook = process.env.SLACK_WEBHOOK_URL;
 const emailSettings = {
