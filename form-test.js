@@ -94,9 +94,7 @@ async function checkHiddenInputs(page, inputAttribute = 'name') {
 	}
 }
 
-async function testHomepageForm(page) {
-	const searchParams = new URLSearchParams(parameters);
-	const url = `https://www.alliant.edu?${searchParams.toString()}`;
+async function testMainSiteForm(page, url) {
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -141,68 +139,13 @@ async function testHomepageForm(page) {
 			throw new Error(`Unexpected redirect: ${page.url()}`);
 		}
 
-		console.log('Homepage form submitted successfully.');
+		console.log(`Main site form submitted successfully. ${url}`);
 	} catch (err) {
-		throw new Error(`Homepage form failed: ${err.message}`);
+		throw new Error(`Main site form failed ${url}: ${err.message}`);
 	}
 }
 
-async function testRequestInfoForm(page) {
-	const searchParams = new URLSearchParams(parameters);
-	const url = `https://www.alliant.edu/request-information?${searchParams.toString()}`;
-	try {
-		await page.goto(url, { waitUntil: 'networkidle2' });
-
-		// Step 1
-		await page.select('#edit-area-of-study', 'Psychology and Mental Health');
-		await page.select('#edit-degree-pmh', 'Master of Arts');
-		await page.select('#edit-major-pmh-master-of-arts', 'Clinical Counseling (MA)');
-		await page.select('#edit-campus-pmh-clinical-counseling-ma', 'Online');
-
-		await setTimeout(1000);
-
-		await page.click('input#edit-actions-wizard-next');
-		await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
-
-		// Step 2
-		await page.type('input[name="first_name"]', `test${Date.now()}`);
-		await page.type('input[name="last_name"]', 'test');
-		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
-		await page.type('input[name="mobile_number"]', '7605629999');
-		await page.type('input[name="zip_code"]', '92108');
-		await page.waitForResponse(
-			(response) => {
-				return response.url().includes('/api/zipcodes') && response.status() === 200;
-			},
-			{ timeout: 5000 },
-		);
-
-		const city = await page.$eval('input[name="city"]', (field) => field.value);
-		const state = await page.$eval('input[name="state"]', (field) => field.value);
-		if (city !== 'San Diego' || state !== 'CA') {
-			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
-		}
-
-		await checkHiddenInputs(page);
-
-		await setTimeout(1000);
-
-		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
-		await page.waitForNavigation({ timeout: 10000 });
-
-		if (!page.url().includes('/thank-you')) {
-			throw new Error(`Unexpected redirect: ${page.url()}`);
-		}
-
-		console.log('Request info form submitted successfully.');
-	} catch (err) {
-		throw new Error(`Request info form failed: ${err.message}`);
-	}
-}
-
-async function testPaidMediaLandingPageHome(page) {
-	const searchParams = new URLSearchParams(parameters);
-	const url = `https://info.alliant.edu/?${searchParams.toString()}`;
+async function testPaidMediaLandingPageHome(page, url) {
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -258,6 +201,7 @@ async function runTests() {
 		args: isCI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
 	});
 	const page = await browser.newPage();
+	const searchParams = new URLSearchParams(parameters);
 
 	await page.setViewport({
 		width: 1920,
@@ -266,19 +210,22 @@ async function runTests() {
 	});
 
 	try {
-		await testHomepageForm(page);
+		const mainSiteHomePageURL = `https://www.alliant.edu/?${searchParams.toString()}`;
+		await testMainSiteForm(page, mainSiteHomePageURL);
 	} catch (err) {
 		failures.push(`❌ Homepage: ${err.message}`);
 	}
 
 	try {
-		await testRequestInfoForm(page);
+		const mainSiteRFIPageURL = `https://www.alliant.edu/request-information?${searchParams.toString()}`;
+		await testMainSiteForm(page, mainSiteRFIPageURL);
 	} catch (err) {
 		failures.push(`❌ Request Info: ${err.message}`);
 	}
 
 	try {
-		await testPaidMediaLandingPageHome(page);
+		const paidMediaSiteHomePageURL = `https://info.alliant.edu/?${searchParams.toString()}`;
+		await testPaidMediaLandingPageHome(page, paidMediaSiteHomePageURL);
 	} catch (err) {
 		failures.push(`❌ Paid Media LP: ${err.message}`);
 	}
