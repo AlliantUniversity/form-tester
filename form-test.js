@@ -138,10 +138,8 @@ async function testMainSiteForm(page, url) {
 		if (!page.url().includes('/thank-you')) {
 			throw new Error(`Unexpected redirect: ${page.url()}`);
 		}
-
-		console.log(`Main site form submitted successfully. ${url}`);
-	} catch (err) {
-		throw new Error(`Main site form failed ${url}: ${err.message}`);
+	} catch (error) {
+		throw new Error(`Main site form failed: ${error.message}`);
 	}
 }
 
@@ -188,8 +186,8 @@ async function testPaidMediaLandingPageHome(page, url) {
 		}
 
 		console.log('PM LP form submitted successfully.');
-	} catch (err) {
-		throw new Error(`PM LP form failed: ${err.message}`);
+	} catch (error) {
+		throw new Error(`PM LP form failed: ${error.message}`);
 	}
 }
 
@@ -209,25 +207,30 @@ async function runTests() {
 		deviceScaleFactor: 1,
 	});
 
+	const mainSiteHomePageURL = `https://www.alliant.edu/`;
 	try {
-		const mainSiteHomePageURL = `https://www.alliant.edu/?${searchParams.toString()}`;
-		await testMainSiteForm(page, mainSiteHomePageURL);
-	} catch (err) {
-		failures.push(`❌ Homepage: ${err.message}`);
+		await testMainSiteForm(page, `${mainSiteHomePageURL}?${searchParams.toString()}`);
+		console.log(`Main site form submitted successfully. ${mainSiteHomePageURL}`);
+	} catch (error) {
+		failures.push(`❌ Homepage | ${mainSiteHomePageURL}: ${error.message}`);
 	}
 
+	const mainSiteRFIPageURL = `https://www.alliant.edu/request-information/`;
 	try {
-		const mainSiteRFIPageURL = `https://www.alliant.edu/request-information?${searchParams.toString()}`;
-		await testMainSiteForm(page, mainSiteRFIPageURL);
-	} catch (err) {
-		failures.push(`❌ Request Info: ${err.message}`);
+		await testMainSiteForm(page, `${mainSiteRFIPageURL}?${searchParams.toString()}`);
+		console.log(`Main site form submitted successfully. ${mainSiteRFIPageURL}`);
+	} catch (error) {
+		failures.push(`❌ Request Info | ${mainSiteRFIPageURL}: ${error.message}`);
 	}
 
+	const paidMediaSiteHomePageURL = `https://info.alliant.edu/`;
 	try {
-		const paidMediaSiteHomePageURL = `https://info.alliant.edu/?${searchParams.toString()}`;
-		await testPaidMediaLandingPageHome(page, paidMediaSiteHomePageURL);
-	} catch (err) {
-		failures.push(`❌ Paid Media LP: ${err.message}`);
+		await testPaidMediaLandingPageHome(
+			page,
+			`${paidMediaSiteHomePageURL}?${searchParams.toString()}`,
+		);
+	} catch (error) {
+		failures.push(`❌ Paid Media LP | ${paidMediaSiteHomePageURL}: ${error.message}`);
 	}
 
 	if (failures.length > 0) {
