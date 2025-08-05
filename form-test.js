@@ -179,14 +179,11 @@ async function testPaidMediaLandingPageHome(page) {
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
-		await page.type('input[name="firstName"]', `test${Date.now()}`);
-		await page.type('input[name="lastName"]', 'test');
-		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
-		await page.type('input[name="phone"]', '7605629999');
-		await page.select('select[name="Major__c_contact"]', 'Business Administration (DBA)');
-		await page.select('select[name="Campus__c_lead"]', 'San Diego');
-		await page.select('select[name="Are_you_an_international_student__c"]', 'No');
-		await page.type('input[name="Zip__c"]', '92108');
+		await page.type('input.first-name', `test${Date.now()}`);
+		await page.type('input.last-name', 'test');
+		await page.type('input.email', `mikeautotest@yopmail.com`);
+		await page.type('input.phone-number', '7605629999');
+		await page.type('input.zip-code', '92108');
 		await page.waitForResponse(
 			(response) => {
 				return response.url().includes('/api/zipcodes') && response.status() === 200;
@@ -194,20 +191,27 @@ async function testPaidMediaLandingPageHome(page) {
 			{ timeout: 5000 },
 		);
 
-		const city = await page.$eval('input[name="City__c"]', (field) => field.value);
-		const state = await page.$eval('input[name="State__c"]', (field) => field.value);
+		const city = await page.$eval('input.city', (field) => field.value);
+		const state = await page.$eval('input.state', (field) => field.value);
 		if (city !== 'San Diego' || state !== 'CA') {
 			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
 		}
 
-		await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
+		await page.select('select.area-of-study', 'Education');
+		await page.select(
+			'select.choose-a-program:not([disabled])',
+			'Administrative Services Credential',
+		);
+		await page.select('select.campus:not([disabled])', 'Online');
+		// await page.select('select[name="Are_you_an_international_student__c"]', 'No');
+		// await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
 
 		await setTimeout(1000);
-		await page.click('button[type="submit"]');
+		await page.click('input.gform_button.button[type="submit"]');
 		await page.waitForNavigation({ timeout: 15000 });
 
 		if (!page.url().includes('/thank-you-confirmation')) {
-			throw new Error(`Unexpected redirect: ${page.url()}`);
+			throw new Error(`Unexpected submit redirect: ${page.url()}`);
 		}
 
 		console.log('PM LP form submitted successfully.');
