@@ -235,7 +235,7 @@ async function runTests() {
 			'🔥 Form Test Failures',
 			`Some form tests failed on ${pacificFormatter.format(new Date())} PT:\n\n${failures.join('\n\n')}`,
 		);
-		throw new Error('One or more form tests failed');
+		throw new Error(`One or more form tests failed:\n\n${failures.join('\n\n')}`);
 	} else {
 		console.log('All forms tested successfully.');
 
