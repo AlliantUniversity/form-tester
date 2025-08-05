@@ -110,6 +110,17 @@ async function testMainSiteForm(page, url) {
 		await page.waitForSelector('input[name="first_name"]', { timeout: 20000 });
 
 		// Step 2
+		await page.select('select[name="us_military"]', 'Yes');
+		await page.select('select[name="country"]', 'Mexico');
+		const zipCode = await page.$eval('input[name="zip_code"]', (field) => field.value);
+		await setTimeout(1000);
+		if (zipCode !== '00000') {
+			throw new Error(`Unexpected international zip code value: ${zipCode}`);
+		}
+
+		// Switch the country field back to US so we can test the US zip code validation.
+		await page.select('select[name="country"]', 'United States');
+
 		await page.type('input[name="first_name"]', `test${Date.now()}`);
 		await page.type('input[name="last_name"]', 'test');
 		await page.type('input[name="email"]', `mikeautotest@yopmail.com`);
@@ -147,6 +158,17 @@ async function testPaidMediaLandingPageHome(page, url) {
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
+		await page.click('input.military');
+		await page.click('input.international-student');
+		const zipCode = await page.$eval('input.zip-code:not([disabled])', (field) => field.value);
+		await setTimeout(1000);
+		if (zipCode !== '00000') {
+			throw new Error(`Unexpected international zip code value: ${zipCode}`);
+		}
+
+		// Uncheck the international checkbox so we can test the US zip code validation.
+		await page.click('input.international-student');
+
 		await page.type('input.first-name', `test${Date.now()}`);
 		await page.type('input.last-name', 'test');
 		await page.type('input.email', `mikeautotest@yopmail.com`);
@@ -171,8 +193,6 @@ async function testPaidMediaLandingPageHome(page, url) {
 			'Administrative Services Credential',
 		);
 		await page.select('select.campus:not([disabled])', 'Online');
-		// await page.select('select[name="Are_you_an_international_student__c"]', 'No');
-		// await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
 
 		await checkHiddenInputs(page, 'class');
 
