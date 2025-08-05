@@ -1,8 +1,11 @@
+/* eslint-disable no-await-in-loop */
 import puppeteer from 'puppeteer';
 import fetch from 'node-fetch';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import { setTimeout } from 'node:timers/promises';
+
+import { parameters } from './includes/test-data.js';
 
 dotenv.config();
 
@@ -74,8 +77,26 @@ async function scrollAndClick(page, selector) {
 	}
 }
 
+async function checkHiddenInputs(page, inputAttribute = 'name') {
+	// for each object in parameters object, check the key for input with that class and the value for the key.
+	for (const [key, value] of Object.entries(parameters)) {
+		const input = await page.$(`input[${inputAttribute}*="${key.toLowerCase()}"]`);
+		if (!input) {
+			throw new Error(`Input not found for key: ${key}`);
+		}
+		const inputValue = await page.evaluate((field) => field.value, input);
+
+		if (inputValue !== value) {
+			throw new Error(
+				`Input value mismatch for ${key}: expected ${value}, got ${inputValue}`,
+			);
+		}
+	}
+}
+
 async function testHomepageForm(page) {
-	const url = 'https://www.alliant.edu';
+	const searchParams = new URLSearchParams(parameters);
+	const url = `https://www.alliant.edu?${searchParams.toString()}`;
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -108,6 +129,8 @@ async function testHomepageForm(page) {
 		if (city !== 'San Diego' || state !== 'CA') {
 			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
 		}
+
+		await checkHiddenInputs(page);
 
 		await setTimeout(1000);
 
@@ -125,7 +148,8 @@ async function testHomepageForm(page) {
 }
 
 async function testRequestInfoForm(page) {
-	const url = 'https://www.alliant.edu/request-information';
+	const searchParams = new URLSearchParams(parameters);
+	const url = `https://www.alliant.edu/request-information?${searchParams.toString()}`;
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -159,6 +183,8 @@ async function testRequestInfoForm(page) {
 			throw new Error(`Unexpected hidden field values: city=${city}, state=${state}`);
 		}
 
+		await checkHiddenInputs(page);
+
 		await setTimeout(1000);
 
 		await scrollAndClick(page, 'input.button--submit-final[type="submit"]');
@@ -175,7 +201,8 @@ async function testRequestInfoForm(page) {
 }
 
 async function testPaidMediaLandingPageHome(page) {
-	const url = 'https://info.alliant.edu/';
+	const searchParams = new URLSearchParams(parameters);
+	const url = `https://info.alliant.edu/?${searchParams.toString()}`;
 	try {
 		await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -206,7 +233,10 @@ async function testPaidMediaLandingPageHome(page) {
 		// await page.select('select[name="Are_you_an_international_student__c"]', 'No');
 		// await page.select('select[name="Served_in_the_U_S_military__c_lead"]', 'No');
 
+		await checkHiddenInputs(page, 'class');
+
 		await setTimeout(1000);
+
 		await page.click('input.gform_button.button[type="submit"]');
 		await page.waitForNavigation({ timeout: 15000 });
 

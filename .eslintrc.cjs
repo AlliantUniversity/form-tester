@@ -8,4 +8,21 @@ module.exports = {
 	parserOptions: {
 		sourceType: 'module',
 	},
+	settings: {
+		'import/resolver': {
+			node: {
+				extensions: ['.js', '.mjs'],
+			},
+		},
+	},
+	rules: {
+		'import/extensions': [
+			'error',
+			'always',
+			{
+				js: 'always',
+				mjs: 'always',
+			},
+		],
+	},
 };
